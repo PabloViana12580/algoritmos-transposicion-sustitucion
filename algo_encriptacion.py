@@ -31,6 +31,8 @@ Encriptar con transposicion: python algo_encriptacion.py -transE
 Desencriptar con transposicion: python algo_encriptacion.py -transD
 Encriptar con sustitución: python algo_encriptacion.py -sustE
 Encriptar con sustitución: python algo_encriptacion.py -sustD
+Encriptar mixto: python algo_encriptacion.py -mixE
+Encriptar mixto: python algo_encriptacion.py -mixD
 """
 # obtenemos los caracteres del abecedario en minuscula
 abecedario = string.ascii_lowercase
@@ -103,21 +105,48 @@ def sust_desencriptar(mensaje, llave):
 	# Recursivamente, buscamos los demas caracteres en el abecedario
 	return character + sust_desencriptar(mensaje[1:], llave[1:])
 
+def llave_sustitucion(mensaje):
+	#Creamos la llave aleatoria que servira como criterio de sustitución para el mensaje
+    dict_llave = list(string.ascii_lowercase)
+    random.shuffle(dict_llave)
+    llave = dict_llave[:len(mensaje)]
+    llave_txt = ''.join([str(elem) for elem in llave])
+    #La escribimos en archivo de texto
+    text_file = open("llave_sustitucion.txt", "w")
+    text_file.write(llave_txt)
+    text_file.close()
+    #Encriptamos con sustitución
+    return llave_txt
+
+def llave_transposicion(mensaje):
+	#Creamos llave de manera aleatoria
+	llave_transposicion = random.randint(0,(len(mensaje)//2))
+	#guardamos la llave en un archivo de texto
+	text_file = open("llave_transposicion.txt", "w")
+	text_file.write(str(llave_transposicion))
+	text_file.close()
+
+	return llave_transposicion
+
+
 if __name__ == '__main__':
-    availableOpt = ["-transE", "-transD", "-sustE", "-sustD"]
+    availableOpt = ["-transE", "-transD", "-sustE", "-sustD", "-mixE", "-mixD"]
     if len(sys.argv) == 1 or sys.argv[1] not in availableOpt:
         print(help)
         exit(0)
 
-    mensaje = input("mensaje a descifrar: ")
+    revi = True
+    while(revi):
+    	mensaje = input("mensaje a descifrar: ")
+    	if (len(mensaje)>26):
+    		print("mensaje demasiado largo")
+    	else:
+    		revi = False
 
+   	#encriptar transposicion
     if sys.argv[1] == availableOpt[0]:
         #Creamos llave de manera aleatoria
-        llave_transposicion = random.randint(0,(len(mensaje)//2))
-        #guardamos la llave en un archivo de texto
-        text_file = open("llave_transposicion.txt", "w")
-        text_file.write(str(llave_transposicion))
-        text_file.close()
+        llave_transposicion = llave_transposicion(mensaje)
         #Ecriptamos el texto con transposición
         texto_cifrado = trans_encriptar(llave_transposicion, mensaje)
         #Imprimimos en pantalla
@@ -125,6 +154,7 @@ if __name__ == '__main__':
         print(texto_cifrado + '|')
         #Copiamos mensaje encriptado al portapapeles
         pyperclip.copy(texto_cifrado)
+
     #Decifrar transposición
     elif sys.argv[1] == availableOpt[1]:
     	#Abrimos archivo con la llave de transposición aleatoria
@@ -135,29 +165,65 @@ if __name__ == '__main__':
     	#Imprimos en pantalla y copiamos al portapapeles
     	pyperclip.copy(plaintext)
     	print(plaintext)
+
     #Encriptar sustitución
     elif sys.argv[1] == availableOpt[2]:
-    	#Creamos la llave aleatoria que servira como criterio de sustitución para el mensaje
-    	dict_llave = list(string.ascii_lowercase)
-    	random.shuffle(dict_llave)
-    	llave = dict_llave[:len(mensaje)]
-    	llave_txt = ''.join([str(elem) for elem in llave])
-    	#La escribimos en archivo de texto
-    	text_file = open("llave_sustitucion.txt", "w")
-    	text_file.write(llave_txt)
-    	text_file.close()
-    	#Encriptamos con sustitución
+    	#creamos llave a utilizar
+    	llave = llave_sustitucion(mensaje)
+    	#encriptamos con sustitución
     	text_crip = sust_encriptar(mensaje.replace(" ",""), llave)
     	#Imprimimos resultado en pantalla y copiamos al portapapeles
     	pyperclip.copy(text_crip)
     	print(text_crip)
-    #Desencriptar sustitucion
+
+    #Decifrar sustitucion
     elif sys.argv[1] == availableOpt[3]:
     	#Abrimos llave única y aleatoria de sustitución
     	text_file = open("llave_sustitucion.txt", "r")
     	llave = text_file.read()
-    	#Desciframos 
+    	#Deciframos 
     	text_crip = sust_desencriptar(mensaje, llave)
     	#Imprimimos resultado en pantalla y copiamos al portapapeles
     	pyperclip.copy(text_crip)
     	print(text_crip)
+
+    #Encriptar mixto
+    elif sys.argv[1] == availableOpt[4]:
+    	
+    	#------Encriptamos con sustitución-----
+    	print("encriptando por sustitución")
+    	#creamos llave a utilizar
+    	llave = llave_sustitucion(mensaje)
+    	#encriptamos con sustitución
+    	text_crip = sust_encriptar(mensaje.replace(" ",""), llave)
+    	#------Encriptamos con transposición------
+    	print("encriptando por transposicion")
+    	#Creamos llave de manera aleatoria
+    	llave_transposicion = llave_transposicion(text_crip)
+    	#Ecriptamos el texto con transposición
+    	texto_cifrado = trans_encriptar(llave_transposicion, text_crip)
+    	#Imprimimos resultado en pantalla y copiamos al portapapeles
+    	pyperclip.copy(texto_cifrado)
+    	print(texto_cifrado)
+
+    #Decifrar mixto
+    elif sys.argv[1] == availableOpt[5]:
+    	
+    	#------Deciframos con transposición------
+    	print("decifrando por transposición")
+    	#Abrimos archivo con la llave de transposición aleatoria
+    	text_file = open("llave_transposicion.txt", "r")
+    	myKey = text_file.read()
+    	#Desencriptamos el mensaje
+    	plaintext = trans_desencriptar(int(myKey), mensaje)
+    	#Imprimos en pantalla y copiamos al portapapeles
+    	#------Deciframos con sustitución------
+    	print("decifrando por sustitución")
+    	#Abrimos llave única y aleatoria de sustitución
+    	text_file = open("llave_sustitucion.txt", "r")
+    	llave = text_file.read()
+    	#Deciframos 
+    	text_crip = sust_desencriptar(plaintext, llave)
+    	pyperclip.copy(text_crip)
+    	print(text_crip)
+
