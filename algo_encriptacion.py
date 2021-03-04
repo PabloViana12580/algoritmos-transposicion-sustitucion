@@ -155,7 +155,7 @@ if __name__ == '__main__':
         #Copiamos mensaje encriptado al portapapeles
         pyperclip.copy(texto_cifrado)
 
-    #Decifrar transposición
+    #descifrar transposición
     elif sys.argv[1] == availableOpt[1]:
     	#Abrimos archivo con la llave de transposición aleatoria
     	text_file = open("llave_transposicion.txt", "r")
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     	pyperclip.copy(text_crip)
     	print(text_crip)
 
-    #Decifrar sustitucion
+    #descifrar sustitucion
     elif sys.argv[1] == availableOpt[3]:
     	#Abrimos llave única y aleatoria de sustitución
     	text_file = open("llave_sustitucion.txt", "r")
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     	pyperclip.copy(texto_cifrado)
     	print(texto_cifrado)
 
-    #Decifrar mixto
+    #descifrar mixto
     elif sys.argv[1] == availableOpt[5]:
     	
     	#------Deciframos con transposición------
